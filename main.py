@@ -1,76 +1,113 @@
 import socket
+import threading
+import time
 
-s = socket.socket()
+print("Welcome to P2P Messenger!")
 
-print("Welcome to P2PMessenger v0.1")
-print("Type a number for use action:")
-print("[1]Settings")
-print("[2]Listening")
-print("[3]Seek")
-print("[4]Exit")
+clientIP = "None"
+serverIP = "None"
+clientPORT = 0
+serverPORT = 0
 
-targetIP = "192.168.0.208"
-targetPORT = 6666
+connected = False
 
-myIP = "192.168.0.170"
-myPORT = 6666
-
-def Established(con):
-    print("Estabilshed")
+def Response(s):
     while True:
         message = input("> ")
-        if message == "0":
-            main()
+        if message == "3":
+            s.close()
             break
-        con.send(message.encode())
-        data = con.recv(1024)  # получаем данные с сервера
-        message = data.decode()  # преобразуем байты в строку
-        print(f"Client sent: {message}")
+        try:
+            s.send(message.encode())
+        except:
+            print("Connection lost")
+            break
 
-def Established_c(con):
-    print("Estabilshed")
+def Listening(s):
     while True:
-        message = input("> ")
-        if int(message) == 0:
-            main()
+        data = s.recv(1024)
+        if data:
+            message = data.decode()
+            print("\nRecived: ", message)
+            print("> ", end="", flush=True)
+        else:
             break
-        s.send(message.encode())
-        data = s.recv(1024)  # получаем данные с сервера
-        print("Server sent: ", data.decode())
 
-
-def main():
+def get_ip(arg):
+    return input(arg)
+def get_port():
     while True:
-        command = int(input("> "))
-        if command == 1:
-            print("---Settings---")
-            targetIP = input("Enter ip: ")
-            targetPORT = int(input("Enter port: "))
+        try:
+            PORT = int(input("Enter PORT(0-65535): "))
+            if (0 <= PORT <= 65535):
+                break
+            print("Wrong port range!")
+        except:
+            print("Not a number!")
+    return PORT
 
-        elif command == 4:
-            print("See you again")
-            break
-        elif command == 2:
-            print("[1]Auto")
-            print("[2]Manual")
-            command = int(input("> "))
-            if command == 1:
-                myIP = socket.gethostname()
-                myPORT = 6666
+while True:
+    print("[0]Settings")
+    print("[1]Listening")
+    print("[2]Seek")
+    print("[3]Exit")
 
-            else:
-                myIP = input("Enter ip: ")
-                myPORT = input("Enter port: ")
-            print(myIP)
-            s.bind((myIP, int(myPORT)))
-            s.listen(1)
-            print("Listening...")
+    command = input("> ")
+
+    if command == "0":
+        print("[0]Client")
+        print("[1]Server")
+        print("[2]Check Settings")
+
+        command = input("> ")
+
+        if command == "0":
+            clientIP = get_ip("Enter IP: ")
+            clientPORT = get_port()
+        elif command == "1":
+            serverIP = get_ip("Enter IP: ")
+            serverPORT = get_port()
+        elif command == "2":
+            print("Client socket: " + clientIP + ":" + str(clientPORT))
+            print("Server socket: " + serverIP + ":" + str(serverPORT))
+    elif command == "1":
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("Listening...")
+        try:
+            s.bind((serverIP, serverPORT))
+        except:
+            print("Error, please check your server settings")
+            continue
+        s.listen(1)
+        s.settimeout(5)
+        try:
             con, addr = s.accept()
-            Established(con)
-            break
-        elif command == 3:
-            print("Seeking...")
-            s.connect((targetIP,targetPORT))
-            Established_c(s)
-            break
-main()
+        except socket.timeout:
+            print("No founded")
+            s.close()
+            continue
+        print("Connected!")
+
+        thread1 = threading.Thread(target=Response, args=(con,))
+        thread2 = threading.Thread(target=Listening, args=(con,))
+        thread1.start()
+        thread2.start()
+
+
+    elif command == "2":
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("Connect...")
+        try:
+            s.connect((clientIP, clientPORT))
+        except:
+            print("Error, please check your client settings")
+            continue
+        thread1 = threading.Thread(target=Response,args=(s,))
+        thread2 = threading.Thread(target=Listening,args=(s,))
+        thread1.start()
+        thread2.start()
+    elif command == "3":
+        break
+
+
+
