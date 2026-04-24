@@ -58,7 +58,7 @@ while live:
     else:
         live = result
 
-    if live is not False:
+    if live != 0:
         live = True
 
 
