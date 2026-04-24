@@ -1,7 +1,7 @@
 import asyncio
 from asyncio import Event
 
-Debugging = True
+Debugging = False
 print("———Settings———")
 
 if Debugging:
