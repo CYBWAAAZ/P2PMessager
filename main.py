@@ -1,5 +1,5 @@
 import asyncio
-from asyncio import Event
+import inspect
 
 Debugging = False
 print("———Settings———")
@@ -12,7 +12,7 @@ else:
     selfIP = input("Please, write your ip adress: ")
     targetIP = input("Please, write target ip adress: ")
 
-print('\nLocal P2P Messenger edition v0.3')
+print('\nLocal P2P Messenger edition v1.0')
 
 def close_app():
     print("Process is down")
@@ -150,7 +150,7 @@ while live:
         print("Unknown command")
         continue
 
-    if asyncio.iscoroutinefunction(action):
+    if inspect.iscoroutinefunction(action):
         live = asyncio.run(action())
     else:
         live = action()
