@@ -4,7 +4,7 @@ import asyncio
 import datetime
 
 async def ENCRYPT(writer, command):
-    writer.write((command).encode())
+    writer.write((command + "\n").encode())
     await writer.drain()
 
     return 1
@@ -14,11 +14,11 @@ async def history(message, sender):
         time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         file.write(f"[{time}] {sender}: {message}\n")
 
-async def chat(reader, writer, cryptography_command):
+async def chat(reader, writer, cryptography_command,isHistory):
     stop_event = asyncio.Event()
 
-    write_task = asyncio.create_task(writing(writer, stop_event, cryptography_command))
-    read_task = asyncio.create_task(reading(reader, stop_event))
+    write_task = asyncio.create_task(writing(writer, stop_event, cryptography_command, isHistory))
+    read_task = asyncio.create_task(reading(reader, stop_event, cryptography_command, isHistory))
 
     await stop_event.wait()
 
@@ -31,7 +31,7 @@ async def chat(reader, writer, cryptography_command):
     await writer.wait_closed()
 
 
-async def reading(reader, stop_event):
+async def reading(reader, stop_event, cryptography_command, isHistory):
     while not stop_event.is_set():
         data = await reader.readline()
 
@@ -39,8 +39,8 @@ async def reading(reader, stop_event):
             print("\nPeer disconnected, please press ENTER to return menu")
             stop_event.set()
             break
-
         msg = data.decode().rstrip('\n')
+        if msg in ['DO ENCRYPT','CAN`T ENCRYPT','PASS ENCRYPT']: continue
         print(f"\rPeer: {msg}\nYou: ", end="", flush=True)
 
         if msg == "exit":
@@ -48,9 +48,10 @@ async def reading(reader, stop_event):
             stop_event.set()
             break
 
-        await history(msg, "Peer")
+        if isHistory:
+            await history(msg, "Peer")
 
-async def writing(writer, stop_event, cryptography_command):
+async def writing(writer, stop_event, cryptography_command, isHistory):
     await ENCRYPT(writer, cryptography_command)
 
     try:
@@ -66,7 +67,8 @@ async def writing(writer, stop_event, cryptography_command):
                 stop_event.set()
                 break
 
-            await history(msg, "You")
+            if isHistory:
+                await history(msg, "You")
 
     except asyncio.CancelledError:
         pass
@@ -74,18 +76,14 @@ async def writing(writer, stop_event, cryptography_command):
         print("\nConnection lost")
         stop_event.set()
 
-async def handler(reader, writer):
-    print("Connected!")
-    await chat(reader, writer)
-
-async def listen(selfIP, cryptography_command):
+async def listen(selfIP, cryptography_command, isHistory):
     print("Listening..")
 
     chat_finished = asyncio.Event()
 
     async def one_client_handler(reader, writer):
         print("Connected!")
-        await chat(reader, writer, cryptography_command)
+        await chat(reader, writer, cryptography_command, isHistory)
         chat_finished.set()
 
     try:
@@ -102,7 +100,7 @@ async def listen(selfIP, cryptography_command):
 
     return True
 
-async def seek(targetIP, cryptography_command):
+async def seek(targetIP, cryptography_command, isHistory):
     print("Seeking..")
     try:
         reader, writer = await asyncio.wait_for(
@@ -114,6 +112,6 @@ async def seek(targetIP, cryptography_command):
         return True
 
     print("Connected!")
-    await chat(reader, writer, cryptography_command)
+    await chat(reader, writer, cryptography_command, isHistory)
 
     return True
