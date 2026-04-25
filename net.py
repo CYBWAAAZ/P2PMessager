@@ -1,11 +1,23 @@
 import crypt
 
 import asyncio
+import datetime
 
-async def chat(reader, writer):
+async def ENCRYPT(writer, command):
+    writer.write((command).encode())
+    await writer.drain()
+
+    return 1
+
+async def history(message, sender):
+    with open("history.txt", "a", encoding="utf-8") as file:
+        time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        file.write(f"[{time}] {sender}: {message}\n")
+
+async def chat(reader, writer, cryptography_command):
     stop_event = asyncio.Event()
 
-    write_task = asyncio.create_task(writing(writer, stop_event))
+    write_task = asyncio.create_task(writing(writer, stop_event, cryptography_command))
     read_task = asyncio.create_task(reading(reader, stop_event))
 
     await stop_event.wait()
@@ -36,12 +48,14 @@ async def reading(reader, stop_event):
             stop_event.set()
             break
 
+        await history(msg, "Peer")
 
-async def writing(writer, stop_event):
+async def writing(writer, stop_event, cryptography_command):
+    await ENCRYPT(writer, cryptography_command)
+
     try:
         while not stop_event.is_set():
             msg = await asyncio.to_thread(input, "You: ")
-
             if stop_event.is_set():
                 break
 
@@ -51,6 +65,8 @@ async def writing(writer, stop_event):
             if msg == "exit":
                 stop_event.set()
                 break
+
+            await history(msg, "You")
 
     except asyncio.CancelledError:
         pass
@@ -62,14 +78,14 @@ async def handler(reader, writer):
     print("Connected!")
     await chat(reader, writer)
 
-async def listen(selfIP):
+async def listen(selfIP, cryptography_command):
     print("Listening..")
 
     chat_finished = asyncio.Event()
 
     async def one_client_handler(reader, writer):
         print("Connected!")
-        await chat(reader, writer)
+        await chat(reader, writer, cryptography_command)
         chat_finished.set()
 
     try:
@@ -86,7 +102,7 @@ async def listen(selfIP):
 
     return True
 
-async def seek(targetIP):
+async def seek(targetIP, cryptography_command):
     print("Seeking..")
     try:
         reader, writer = await asyncio.wait_for(
@@ -98,6 +114,6 @@ async def seek(targetIP):
         return True
 
     print("Connected!")
-    await chat(reader, writer)
+    await chat(reader, writer, cryptography_command)
 
     return True

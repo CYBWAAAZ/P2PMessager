@@ -1,8 +1,12 @@
+from cryptography.utils import CryptographyDeprecationWarning
+
 import net
 import asyncio
 import inspect
 
 Debugging = False
+CryptographyCommand = 'CAN`T ENCRYPT'
+
 print("———Settings———")
 
 if Debugging:
@@ -13,7 +17,7 @@ else:
     selfIP = input("Please, write your ip adress: ")
     targetIP = input("Please, write target ip adress: ")
 
-print('\nLocal P2P Messenger edition v1.1')
+print('\nLocal P2P Messenger edition v1.2')
 
 def close_app():
     print("Process is down")
@@ -29,8 +33,8 @@ def print_options():
 
 commands = {
     0: close_app,
-    1: lambda: net.listen(selfIP),
-    2: lambda: net.seek(targetIP),
+    1: lambda: net.listen(selfIP,CryptographyCommand),
+    2: lambda: net.seek(targetIP,CryptographyCommand),
     3: credits
 }
 
