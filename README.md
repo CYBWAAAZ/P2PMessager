@@ -1,4 +1,4 @@
-# 📡 P2P Messager (P2PMessager)
+# 📡 P2P Chat (P2PMessager)
 
 CLI-based peer-to-peer chat application written in Python 🐍.  
 Allows direct communication between devices in local networks without central servers.

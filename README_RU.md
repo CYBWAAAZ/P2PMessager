@@ -1,4 +1,4 @@
-# 📡 P2P Messager (P2PMessager)
+# 📡 P2P Chat (P2PMessager)
 
 CLI-чат peer-to-peer на Python 🐍.  
 Позволяет напрямую обмениваться сообщениями между устройствами в локальной сети без посредника.
