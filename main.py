@@ -17,7 +17,7 @@ else:
     selfIP = input("Please, write your ip adress: ")
     targetIP = input("Please, write target ip adress: ")
 
-print('\nLocal P2P Messenger edition v1.3')
+print('\nLocal P2P Messenger Standard-edition v1.3')
 
 def close_app():
     print("Process is down")
