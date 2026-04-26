@@ -1,4 +1,4 @@
-import net
+from core import net
 import asyncio
 import inspect
 
@@ -17,7 +17,7 @@ else:
     selfIP = input("Please, write your ip adress: ")
     targetIP = input("Please, write target ip adress: ")
 
-print('\nLocal P2P Messenger edition v1.2')
+print('\nLocal P2P Messenger edition v1.3')
 
 def close_app():
     print("Process is down")
@@ -64,8 +64,8 @@ def print_options():
 
 commands = {
     0: close_app,
-    1: lambda: net.listen(selfIP,cryptography_command,isHistory),
-    2: lambda: net.seek(targetIP,cryptography_command,isHistory),
+    1: lambda: net.listen(selfIP, cryptography_command, isHistory),
+    2: lambda: net.seek(targetIP, cryptography_command, isHistory),
     3: credits,
     4: settings
 }

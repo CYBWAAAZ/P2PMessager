@@ -60,7 +60,7 @@ async def writing(writer, stop_event, cryptography_command, isHistory):
             if stop_event.is_set():
                 break
 
-            writer.write((msg + "\n").encode())
+            writer.write((msg + "\n").encode("utf-8"))
             await writer.drain()
 
             if msg == "exit":
