@@ -1,4 +1,4 @@
-import crypt
+from core import crypt
 
 import asyncio
 import datetime
