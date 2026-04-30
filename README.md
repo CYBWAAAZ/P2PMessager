@@ -42,7 +42,7 @@ to analyze:
 
 ---
 
-### 🔐 P2PMessager Encrypted Edition
+### 🔐 P2PMessager Encrypted Edition (WIP)
 - TCP-based communication
 - The ability to use encryption
 
